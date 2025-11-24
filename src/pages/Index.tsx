@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -171,9 +171,22 @@ const Index = () => {
   const [language, setLanguage] = useState<Language>('en');
   const [activeSection, setActiveSection] = useState<Section>('home');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const stored = localStorage.getItem('dan-chat');
+      return stored ? (JSON.parse(stored) as ChatMessage[]) : [];
+    } catch (error) {
+      console.error('Failed to load chat history', error);
+      return [];
+    }
+  });
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem('dan-chat', JSON.stringify(messages));
+  }, [messages]);
+
 
   const t = (key: string) => translations[key]?.[language] || key;
 
